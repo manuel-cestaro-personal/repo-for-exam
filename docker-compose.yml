@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - ./env/database.env
+    ports: 
+      - 5432:5432
+    volumes:
+      - postgres-vol:/var/lib/postgresql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: unless-stopped
+    env_file:
+      - ./env/pgadmin.env
+    links:
+      - "postgres:pg"
+    ports:
+      - 8080:80
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin-vol:/var/lib/pgadmin
+
+  backend:
+    image: backend-prova 
+    container_name: backend 
+    restart: unless-stopped 
+    env_file:
+      - ./env/process.env
+    ports:
+      - 80:80
+    depends_on:
+      - postgres
+
+volumes:
+  postgres-vol:
+    driver: local
+  pgadmin-vol:
+    driver: local
+
+networks:
+  default:
+    external:
+      name: dockernetwork

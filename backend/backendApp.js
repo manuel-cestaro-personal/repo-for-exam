@@ -5,16 +5,16 @@ const { stringify } = require('querystring');
 const app = express();
 
 const pool = new Pool({
-    user: "itsuser",
-    host: process.env.DB,
-    database: "itsdb",
-    password: "itsuser01",
-    port: "5432"
+    user: process.env.USER,
+    host: process.env.HOSTDB,
+    database: process.env.DB,
+    password: process.env.PWD,
+    port: process.env.PORTDB
 });
 
 
 
-let formInput = 'Nessun dato ancora inserito';
+let formInput = 'Inserire il primo record';
 
 app.use(
     bodyParser.urlencoded({
@@ -32,19 +32,24 @@ app.get('/', (req, res) => {
       </head>
       <body>
         <section>
-          <h2>PROVA ITS</h2>
+          <h2>HOME PAGE - ESAME FINALE ITS: corso DEVO</h2>
           <h3>Valore inserito: ${formInput}</h3>
         </section>
         <form action="/save" method="POST">
           <div class="form-control">
-            <label>Text</label>
-            <input type="text" name="astring">
-            <label>Number</label>
-            <input type="number" name="anum">
+            <label>Una stringa</label>
+            <input type="text" name="astring"><br>
+            <label>Un numero</label>
+            <input type="number" name="anum"><br>
+            <label>Un item della lista</label>
+            <select name="country">
+            <option>Italy</option>
+            <option>Germany</option>
+            </select>           
           </div><br>
-          <button>Acquisci il testo</button>&nbsp;
-          <button><a style='color:#FFFFFF' href=http://${process.env.HOST}/find>CERCA</a></button>&nbsp;
-          <button><a style='color:#FFFFFF' href=http://${process.env.HOST}/list>VISULIZZA TUTTI</a></button>
+          <button>INSERISCI DATI</button>&nbsp;
+          <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:${process.env.PORT}/find>CERCA</a></button>&nbsp;
+          <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:${process.env.PORT}/list>VISULIZZA TUTTI</a></button>
         </form>
       </body>
     </html>
@@ -54,15 +59,16 @@ app.get('/', (req, res) => {
 app.post('/save', (req, res) => {
     const enteredText = req.body.astring;
     const enteredNumber = req.body.anum;
-    console.log('valori inseriti: ' + enteredText + ',' + enteredNumber);
+    const enteredCountry = req.body.country
+    console.log('valori inseriti: ' + enteredText + ',' + enteredNumber + ',' + enteredCountry);
     const url = "/";
-    formInput = enteredText + ' - ' + enteredNumber;
+    formInput = enteredText + ' - ' + enteredNumber + ' - ' + enteredCountry;
 
 
     pool.query(
-        "INSERT INTO prova(nome, numero)VALUES('" + enteredText + "','" + enteredNumber + "')",
+        "INSERT INTO prova(nome, numero, country)VALUES('" + enteredText + "','" + enteredNumber + "','" + enteredCountry + "')",
         (err, res) => {
-            var errorMessage = "";
+            const errorMessage = "";
             if (err) {
                 errorMessage = "Insertion in db failed";
             }
@@ -76,12 +82,12 @@ app.post('/save', (req, res) => {
 
 app.get("/list", async(req, res) => {
 
-    let myresult = '<table><tr><td><h3>NOME</h3></td><td><h3>NUMERO</h3></td></tr>';
+    let myresult = '<table><tr><td><h3>NOME</h3></td><td><h3>NUMERO</h3></td><td><h3>ITEM</h3></td></tr>';
     const rows = await pool.query('SELECT * FROM prova');
     for (let i = 0; i < rows.rowCount; i++) {
         ajson = JSON.parse(JSON.stringify(rows.rows[i]));
         console.log(ajson.nome);
-        myresult += "<tr><td>" + ajson.nome + "</td><td>" + ajson.numero + "</td></tr>";
+        myresult += "<tr><td>" + ajson.nome + "</td><td>" + ajson.numero + "</td><td>" + ajson.country + "</td></tr>";
     }
     myresult += '</table><br>';
 
@@ -93,11 +99,11 @@ app.get("/list", async(req, res) => {
       </head>
       <body>
       <section>
-      <h2>PROVA ITS</h2>
-      <h3>Valori inseriti</h3>
+      <h2>ESAME FINALE ITS: corso DEVO</h2>
+      <h3>Elenco record inseriti</h3>
        ${myresult}
-       <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:80>HOME</a></button>&nbsp;
-       <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:80/find>CERCA</a></button>
+       <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:${process.env.PORT}>HOME</a></button>&nbsp;
+       <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:${process.env.PORT}/find>CERCA</a></button>
       
     </section>
       </body>
@@ -114,17 +120,17 @@ app.get("/find", async(req, res) => {
     </head>
     <body>
       <section>
-        <h2>PROVA ITS</h2>
-        <h3>RICERCA PER NOME</h3>
+        <h2>RICERCA - ESAME FINALE ITS: corso DEVO</h2>
+        <h3>RICERCA PER STRINGA</h3>
       </section>
       <form action="/mysearch" method="POST">
         <div class="form-control">
-          <label>Testo di ricerca</label>
+          <label>Testo di ricerca (nome)</label>
           <input type="text" name="astring">
         </div>
         <button>Cerca</button>&nbsp;
-        <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:80>HOME</a></button>&nbsp;
-        <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:80/list>VISULIZZA TUTTI</a></button>
+        <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:${process.env.PORT}>HOME</a></button>&nbsp;
+        <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:${process.env.PORT}/list>VISULIZZA TUTTI</a></button>
       </form>
     </body>
   </html>
@@ -137,7 +143,7 @@ app.post('/mysearch', async(req, res) => {
     // let query = 'SELECT * FROM prova WHERE nome ilike(\'%' + enteredText + '%\')';
     let query = 'SELECT * FROM prova WHERE nome = \'' + enteredText + '\'';
     console.log(query);
-    let myresult = '<table><tr><td><h3>NOME</h3></td><td><h3>NUMERO</h3></td></tr>';
+    let myresult = '<table><tr><td><h3>NOME</h3></td><td><h3>NUMERO</h3></td><td><h3>ITEM</h3></td></tr>';
     const rows = await pool.query(query);
     for (let i = 0; i < rows.rowCount; i++) {
         ajson = JSON.parse(JSON.stringify(rows.rows[i]));
@@ -153,12 +159,12 @@ app.post('/mysearch', async(req, res) => {
       </head>
       <body>
       <section>
-      <h2>PROVA ITS</h2>
+      <h2>ESAME FINALE ITS: corso DEVO<</h2>
       <h3>RISULTATO DELLA RICERCA per ${enteredText}</h3>
        ${myresult}
-      <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:80/>HOME</a></button>&nbsp;
-      <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:80/find>FAI UN'ALTRA RICERCA</a></button>
-      <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:80/list>VISULIZZA TUTTI</a></button>
+      <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:${process.env.PORT}/>HOME</a></button>&nbsp;
+      <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:${process.env.PORT}/find>FAI UN'ALTRA RICERCA</a></button>
+      <button><a style='color:#FFFFFF' href=http://${process.env.HOST}:${process.env.PORT}/list>VISULIZZA TUTTI</a></button>
 
     </section>
       </body>
@@ -168,6 +174,6 @@ app.post('/mysearch', async(req, res) => {
 
 //res.redirect('/search');
 
-app.listen(80);
+app.listen(process.env.PORT);
 
 //pool.end();

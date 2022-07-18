@@ -5,10 +5,10 @@ const { stringify } = require('querystring');
 const app = express();
 
 const pool = new Pool({
-    user: process.env.USER,
+    user: process.env.USERDB,
     host: process.env.HOSTDB,
     database: process.env.DB,
-    password: process.env.PWD,
+    password: process.env.PWDDB,
     port: process.env.PORTDB
 });
 

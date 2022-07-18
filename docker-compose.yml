@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.7'
 services:
 
   postgres:
@@ -28,7 +28,7 @@ services:
       - pgadmin-vol:/var/lib/pgadmin
 
   backend:
-    image: backend-prova 
+    image: backend-img:v1.0 
     container_name: backend 
     restart: unless-stopped 
     env_file:

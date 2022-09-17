@@ -21,3 +21,6 @@ Specifically, it requires:
 - use `docker ps -a` to check the containers
 
 ## Conclusions
+In particular, this site has numerous vulnerabilities that I exploited in the last part of the test, the penetration test.
+I think I will use this repo for other tests. &#129300;
+Hope it can help you! &#128406;

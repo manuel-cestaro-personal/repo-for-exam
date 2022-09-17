@@ -12,7 +12,7 @@ Specifically, it requires:
 - the use of volumes (named volume) for data persistence (not bind mounts);
 
 ## Start application
-- clone the repo
+- clone the repo https://github.com/manuel-cestaro-personal/repo-for-exam/archive/refs/heads/main.zip
 - `cd ./repo-for-exam/backend`
 - `docker buid -t backend-img:v1.0 .`
 - `cd ..`
